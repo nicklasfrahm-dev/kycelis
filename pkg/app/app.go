@@ -1,6 +1,7 @@
 package app
 
 import (
+	"net/http"
 	"os"
 	"strconv"
 
@@ -18,7 +19,7 @@ func New(_ *zap.Logger) *echo.Echo {
 	app.HidePort = true
 
 	app.GET("/health", func(c echo.Context) error {
-		return c.String(200, "OK")
+		return c.String(http.StatusOK, http.StatusText(http.StatusOK))
 	})
 
 	return app

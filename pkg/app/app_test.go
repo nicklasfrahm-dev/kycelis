@@ -1,6 +1,7 @@
 package app_test
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,13 +13,15 @@ import (
 
 func TestNew(t *testing.T) {
 	// Arrange.
+	t.Parallel()
+
 	logger := zap.NewNop()
 
 	server := httptest.NewServer(app.New(logger).Server.Handler)
 	defer server.Close()
 
 	// Act.
-	req, err := http.NewRequest(http.MethodGet, server.URL+"/health", nil)
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, server.URL+"/health", nil)
 	require.NoError(t, err, "should not fail to create a new request")
 
 	res, err := http.DefaultClient.Do(req)
