@@ -1,0 +1,1 @@
+{"go-coverage-action-fmt":1,"coverage_pct":55.81395348837209,"pkg_stats":{"kycelis.dev/core/cmd/kycelisd":[0],"kycelis.dev/core/pkg/app":[100],"kycelis.dev/core/pkg/response":[100]},"skipped_count":0}
