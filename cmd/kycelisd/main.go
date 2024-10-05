@@ -37,13 +37,7 @@ func main() {
 
 	server := app.New(logger)
 
-	go func(srv *echo.Echo) {
-		port := app.GetPort(logger)
-
-		logger.Info("Starting server", zap.Int64("port", port))
-
-		errorChannel <- srv.Start(fmt.Sprintf(":%d", port))
-	}(server)
+	go startServer(logger, server, errorChannel)
 
 	select {
 	case err := <-errorChannel:
@@ -62,4 +56,12 @@ func main() {
 			logger.Fatal("Failed to shutdown server gracefully", zap.Error(err))
 		}
 	}
+}
+
+func startServer(logger *zap.Logger, srv *echo.Echo, errorChannel chan<- error) {
+	port := app.GetPort(logger)
+
+	logger.Info("Starting server", zap.Int64("port", port))
+
+	errorChannel <- srv.Start(fmt.Sprintf(":%d", port))
 }

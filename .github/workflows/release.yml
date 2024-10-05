@@ -112,11 +112,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dist
-
-      - name: Debug artifact
-        run: |
-          ls -lah
-          ls -lah dist
+          path: dist
 
       - name: Import container image
         run: make container-import
