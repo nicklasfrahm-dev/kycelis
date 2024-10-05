@@ -77,7 +77,7 @@ jobs:
 
       - name: Export version
         if: github.ref == 'refs/heads/main'
-        run: echo "VERSION=${{ steps.semantic.outputs.release-version }}" >>"$GITHUB_ENV"
+        run: echo "VERSION=${{ steps.semantic.outputs.git-tag }}" >>"$GITHUB_ENV"
 
       - name: Build container image
         run: make container-build
@@ -92,20 +92,22 @@ jobs:
         with:
           if-no-files-found: error
           name: dist
-          path: dist/
+          path: dist
 
-  publish:
-    name: Publish
+  release:
+    name: Release
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs:
+      - lint
+      - test
       - containerize
     permissions:
-      contents: read
-    environment:
-      name: dockerhub
+      contents: write
+      pull-requests: write
+      issues: write
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Download artifact
@@ -123,26 +125,10 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Push container image
-        run: make container-push
-
-  release:
-    name: Release
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs:
-      - lint
-      - test
-      - publish
-    permissions:
-      contents: write
-      pull-requests: write
-      issues: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
       - name: Create release
         uses: docker://ghcr.io/codfish/semantic-release-action:v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push container image
+        run: make container-push
