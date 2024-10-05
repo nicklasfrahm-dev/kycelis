@@ -16,7 +16,7 @@ jobs:
       contents: read
       checks: write
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Go
@@ -34,15 +34,89 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 10
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
 
       - uses: gwatts/go-coverage-action@v2
         with:
           cover-pkg: ./...
           fail-coverage: never
+
+  containerize:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Compute version
+        uses: docker://ghcr.io/codfish/semantic-release-action:v3
+        id: semantic
+        with:
+          dry-run: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Export version
+        run: echo "VERSION=${{ steps.semantic.outputs.release-version }}" >>"$GITHUB_ENV"
+
+      - name: Build container image
+        run: make container-build
+
+      - name: Export container image
+        run: make container-export
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          name: dist
+          path: dist/
+    outputs:
+      version: ${{ steps.semantic.outputs.release-version }}
+
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs:
+      - containerize
+    permissions:
+      contents: read
+    environment:
+      name: dockerhub
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Export version
+        run: echo "VERSION=${{ needs.containerize.outputs.version }}" >>"$GITHUB_ENV"
+
+      - name: Import container image
+        run: make container-import
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Push container image
+        run: make container-push
 
   release:
     name: Release
@@ -51,6 +125,7 @@ jobs:
     needs:
       - lint
       - test
+      - publish
     permissions:
       contents: write
       pull-requests: write
