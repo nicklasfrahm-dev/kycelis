@@ -1,0 +1,23 @@
+# Build the application.
+FROM golang AS build
+ARG VERSION
+
+WORKDIR /app
+COPY go.* /app
+RUN go mod download
+
+ADD . .
+RUN VERSION=$VERSION make build
+
+# Build the final image.
+FROM gcr.io/distroless/static-debian12 AS run
+ARG VERSION
+
+LABEL org.opencontainers.image.documentation="/README.md"
+LABEL org.opencontainers.image.authors="Nicklas Frahm <nicklas.frahm@gmail.com>"
+LABEL org.opencontainers.image.source="https://github.com/nicklasfrahm-dev/kycelis"
+LABEL org.opencontainers.image.version=$VERSION
+
+COPY --from=build /app/README.md /README.md
+COPY --from=build /app/bin/kycelisd /kycelisd
+CMD [ "/kyselisd" ]
