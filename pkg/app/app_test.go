@@ -18,62 +18,52 @@ func TestNew(t *testing.T) {
 	// Arrange.
 	t.Parallel()
 
-	logger := zap.NewNop()
+	cases := []struct {
+		endpoint string
+		expected response.Status
+	}{
+		{
+			endpoint: "/health",
+			expected: *response.NewStatusFromError(response.ErrServiceHealthy),
+		},
+		{
+			endpoint: "/unknown",
+			expected: *response.NewStatusFromError(response.ErrUnknownEndpoint),
+		},
+	}
 
-	server := httptest.NewServer(app.New(logger).Server.Handler)
-	defer server.Close()
+	for _, testCase := range cases {
+		t.Run(testCase.expected.Message, func(run *testing.T) {
+			// Arrange.
+			run.Parallel()
 
-	expected := response.NewStatusFromError(response.ErrServiceHealthy)
+			logger := zap.NewNop()
 
-	// Act.
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, server.URL+"/health", nil)
-	require.NoError(t, err, "should not fail to create a new request")
+			server := httptest.NewServer(app.New(logger).Server.Handler)
+			defer server.Close()
 
-	res, err := http.DefaultClient.Do(req)
-	require.NoError(t, err, "should not fail to send a request")
+			expected := response.NewStatusFromError(response.ErrServiceHealthy)
 
-	defer res.Body.Close()
+			// Act.
+			req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, server.URL+"/health", nil)
+			require.NoError(t, err, "should not fail to create a new request")
 
-	// Assert.
-	assert.Equal(t, expected.Code, res.StatusCode, "should return a 200 status code")
+			res, err := http.DefaultClient.Do(req)
+			require.NoError(t, err, "should not fail to send a request")
 
-	status := new(response.Status)
+			defer res.Body.Close()
 
-	err = json.NewDecoder(res.Body).Decode(status)
-	require.NoError(t, err, "should not fail to decode the response body")
+			// Assert.
+			assert.Equal(t, expected.Code, res.StatusCode, "should return a 200 status code")
 
-	assert.Equal(t, *expected, *status, "should return the expected status")
-}
+			status := new(response.Status)
 
-func TestNewUnknownEndpoint(t *testing.T) {
-	// Arrange.
-	t.Parallel()
+			err = json.NewDecoder(res.Body).Decode(status)
+			require.NoError(t, err, "should not fail to decode the response body")
 
-	logger := zap.NewNop()
-
-	server := httptest.NewServer(app.New(logger).Server.Handler)
-	defer server.Close()
-
-	expected := response.NewStatusFromError(response.ErrUnknownEndpoint)
-
-	// Act.
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, server.URL+"/unknown", nil)
-	require.NoError(t, err, "should not fail to create a new request")
-
-	res, err := http.DefaultClient.Do(req)
-	require.NoError(t, err, "should not fail to send a request")
-
-	defer res.Body.Close()
-
-	// Assert.
-	assert.Equal(t, expected.Code, res.StatusCode, "should return a 404 status code")
-
-	status := new(response.Status)
-
-	err = json.NewDecoder(res.Body).Decode(status)
-	require.NoError(t, err, "should not fail to decode the response body")
-
-	assert.Equal(t, *expected, *status, "should return the expected status")
+			assert.Equal(t, *expected, *status, "should return the expected status")
+		})
+	}
 }
 
 func TestGetPort(t *testing.T) {

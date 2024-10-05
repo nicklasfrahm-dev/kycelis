@@ -16,6 +16,8 @@ type Status struct {
 }
 
 // MapErrorToStatus maps an error to a status.
+//
+//nolint:gochecknoglobals // This is a map of errors to status codes.
 var MapErrorToStatusCode = map[error]int{
 	ErrServiceHealthy:  http.StatusOK,
 	ErrUnexpectedError: http.StatusInternalServerError,

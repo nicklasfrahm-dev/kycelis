@@ -47,12 +47,15 @@ func TestNewStatusFromError(t *testing.T) {
 	}
 
 	for _, testCase := range cases {
-		t.Run(testCase.err.Error(), func(t *testing.T) {
+		t.Run(testCase.err.Error(), func(run *testing.T) {
+			// Arrange.
+			run.Parallel()
+
 			// Act.
 			status := response.NewStatusFromError(testCase.err)
 
 			// Assert.
-			assert.Equal(t, testCase.expected, *status, "should return the correct status")
+			assert.Equal(run, testCase.expected, *status, "should return the correct status")
 		})
 	}
 }
