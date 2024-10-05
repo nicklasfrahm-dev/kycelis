@@ -24,7 +24,7 @@ jobs:
         with:
           go-version: stable
 
-      - name: golangci-lint
+      - name: Lint code
         uses: golangci/golangci-lint-action@v6
 
   test:
@@ -44,7 +44,8 @@ jobs:
         with:
           go-version: stable
 
-      - uses: gwatts/go-coverage-action@v2
+      - name: Test code
+        uses: gwatts/go-coverage-action@v2
         with:
           cover-pkg: ./...
           fail-coverage: never
@@ -106,6 +107,8 @@ jobs:
       contents: write
       pull-requests: write
       issues: write
+    environment:
+      name: dockerhub
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -1,12 +1,12 @@
 package app
 
 import (
-	"net/http"
 	"os"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
+	"kycelis.dev/core/pkg/response"
 )
 
 // DefaultPort is the default port the server listens on.
@@ -19,7 +19,15 @@ func New(_ *zap.Logger) *echo.Echo {
 	app.HidePort = true
 
 	app.GET("/health", func(c echo.Context) error {
-		return c.String(http.StatusOK, http.StatusText(http.StatusOK))
+		status := response.NewStatusFromError(response.ErrServiceHealthy)
+
+		return c.JSON(status.Code, status)
+	})
+
+	app.GET("/*", func(c echo.Context) error {
+		status := response.NewStatusFromError(response.ErrUnknownEndpoint)
+
+		return c.JSON(status.Code, status)
 	})
 
 	return app
