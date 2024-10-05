@@ -113,6 +113,11 @@ jobs:
         with:
           name: dist
 
+      - name: Debug artifact
+        run: |
+          ls -lah
+          ls -lah dist
+
       - name: Import container image
         run: make container-import
 
