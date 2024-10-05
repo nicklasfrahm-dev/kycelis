@@ -50,6 +50,7 @@ jobs:
           fail-coverage: never
 
   containerize:
+    name: Containerize
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -75,10 +76,10 @@ jobs:
         run: echo "VERSION=${{ steps.semantic.outputs.release-version }}" >>"$GITHUB_ENV"
 
       - name: Build container image
-        run: make container-build
+        run: VERSION=$VERSION make container-build
 
       - name: Export container image
-        run: make container-export
+        run: VERSION=$VERSION make container-export
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
