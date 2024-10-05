@@ -66,6 +66,7 @@ jobs:
 
       - name: Compute version
         uses: docker://ghcr.io/codfish/semantic-release-action:v3
+        if: github.ref == 'refs/heads/main'
         id: semantic
         with:
           dry-run: true
@@ -73,22 +74,23 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Export version
+        if: github.ref == 'refs/heads/main'
         run: echo "VERSION=${{ steps.semantic.outputs.release-version }}" >>"$GITHUB_ENV"
 
       - name: Build container image
-        run: VERSION=$VERSION make container-build
+        run: make container-build
 
       - name: Export container image
-        run: VERSION=$VERSION make container-export
+        if: github.ref == 'refs/heads/main'
+        run: make container-export
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
+        if: github.ref == 'refs/heads/main'
         with:
           if-no-files-found: error
           name: dist
           path: dist/
-    outputs:
-      version: ${{ steps.semantic.outputs.release-version }}
 
   publish:
     name: Publish
@@ -104,8 +106,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Export version
-        run: echo "VERSION=${{ needs.containerize.outputs.version }}" >>"$GITHUB_ENV"
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
 
       - name: Import container image
         run: make container-import
