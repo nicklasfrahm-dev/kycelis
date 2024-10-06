@@ -71,3 +71,13 @@ container-export: ## Export the container.
 .PHONY: container-import
 container-import: ## Import the container.
 	docker load -i dist/$(APPLICATION).tar
+
+.PHONY: infra-plan
+infra-plan: ## Plan the infrastructure.
+	tofu -chdir=deploy/tofu init
+	tofu -chdir=deploy/tofu plan -var-file=local.tfvars
+
+.PHONY: infra-apply
+infra-apply: ## Apply the infrastructure.
+	tofu -chdir=deploy/tofu init
+	tofu -chdir=deploy/tofu apply -var-file=local.tfvars -auto-approve

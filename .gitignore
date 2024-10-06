@@ -6,3 +6,8 @@ dist/
 
 # Environment variables.
 .env
+
+# Ignore Terraform files.
+.terraform/
+*.tfvars
+*.terraform.lock.hcl
