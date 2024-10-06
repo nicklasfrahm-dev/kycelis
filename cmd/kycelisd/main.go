@@ -52,6 +52,8 @@ func main() {
 		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 		defer cancel()
 
+		logger.Info("Shutting down server gracefully")
+
 		if err := server.Shutdown(ctx); err != nil {
 			logger.Fatal("Failed to shutdown server gracefully", zap.Error(err))
 		}

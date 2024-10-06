@@ -26,7 +26,7 @@ run: .env ## Run the kycelisd server locally.
 
 .PHONY: build
 build: ## Build the kycelisd server.
-	go build $(GOFLAGS) -o bin/kycelisd cmd/$(APPLICATION)/main.go
+	CGO_ENABLED=0 go build $(GOFLAGS) -o bin/$(APPLICATION) cmd/$(APPLICATION)/main.go
 
 .PHONY: test
 test: ## Run tests.
