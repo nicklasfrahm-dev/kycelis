@@ -1,13 +1,25 @@
 # Build the application.
 FROM golang AS build
 
+# Download the latest UPX release version and install it.
+RUN apt-get update \
+  && apt-get install -y curl jq xz-utils bash \
+  && bash -c "\
+  UPX_VERSION=\$(curl -s https://api.github.com/repos/upx/upx/releases/latest | jq -r .tag_name) && \
+  UPX_BINARY=\"upx-\${UPX_VERSION:1}-amd64_linux.tar.xz\" && \
+  curl -L -o upx.tar.xz \"https://github.com/upx/upx/releases/download/\${UPX_VERSION}/\${UPX_BINARY}\" && \
+  tar -xvf upx.tar.xz && \
+  mv upx*/upx /usr/local/bin/ && \
+  chmod +x /usr/local/bin/upx && \
+  rm -rf upx* upx.tar.xz"
+
 WORKDIR /app
 COPY go.* /app/
 RUN go mod download
 
 COPY . /app/
 ARG VERSION
-RUN VERSION=$VERSION make build
+RUN VERSION=$VERSION UPXFLAGS="--lzma -9" make build
 
 CMD [ "/app/bin/kycelisd" ]
 

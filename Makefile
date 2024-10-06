@@ -4,6 +4,7 @@ REGISTRY		?= docker.io
 VERSION			?= $(shell git describe --tags --always --dirty)
 IMAGE				:= $(REGISTRY)/$(NAMESPACE)/$(APPLICATION):$(VERSION)
 GOFLAGS			:= -ldflags "-X main.version=$(VERSION) -s -w"
+UPXFLAGS		?= ""
 
 define HELP_HEADER
 Usage:	make <target>
@@ -27,6 +28,9 @@ run: .env ## Run the kycelisd server locally.
 .PHONY: build
 build: ## Build the kycelisd server.
 	CGO_ENABLED=0 go build $(GOFLAGS) -o bin/$(APPLICATION) cmd/$(APPLICATION)/main.go
+ifneq ($(UPXFLAGS),"")
+	upx $(UPXFLAGS) bin/$(APPLICATION)
+endif
 
 .PHONY: test
 test: ## Run tests.
