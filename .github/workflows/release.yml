@@ -112,6 +112,7 @@ jobs:
         with:
           create_credentials_file: 'true'
           workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
+          project_id: ${{ vars.PROJECT }}
 
       - name: Setup OpenTofu
         uses: opentofu/setup-opentofu@v1
