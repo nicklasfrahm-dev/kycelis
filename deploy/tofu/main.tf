@@ -4,7 +4,6 @@ resource "google_service_account" "kycelisd" {
 }
 
 resource "google_cloud_run_v2_service" "kycelisd" {
-  project  = var.GOOGLE_PROJECT_ID
   name     = "kycelisd"
   location = "us-central1"
   deletion_protection = false
@@ -28,5 +27,18 @@ resource "google_cloud_run_v2_service" "kycelisd" {
         }
       }
     }
+  }
+}
+
+resource "google_cloud_run_domain_mapping" "kycelisd" {
+  name     = "${google_cloud_run_v2_service.kycelisd.name}.nicklasfrahm.dev"
+  location = google_cloud_run_v2_service.kycelisd.location
+
+  metadata {
+    namespace = google_cloud_run_v2_service.kycelisd.project
+  }
+
+  spec {
+    route_name = google_cloud_run_v2_service.kycelisd.name
   }
 }

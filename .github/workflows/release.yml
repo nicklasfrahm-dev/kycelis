@@ -74,7 +74,7 @@ jobs:
         run: |
           set -eou pipefail
 
-          if [[ "${{ github.ref }} == "refs/heads/main" ]]; then
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             echo "version=${{ steps.semantic.outputs.git-tag }}" >>"$GITHUB_OUTPUT"
           else
             echo "version=$(git describe --tags --always)" >>"$GITHUB_OUTPUT"
