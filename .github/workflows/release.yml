@@ -125,7 +125,7 @@ jobs:
           EOF
 
       - name: Debug GCP credentials
-        run: cat $GOOGLE_APPLICATION_CREDENTIALS | grep
+        run: cat $GOOGLE_APPLICATION_CREDENTIALS | grep client_email
 
       - name: Initialize OpenTofu
         run: tofu -chdir=deploy/tofu init
