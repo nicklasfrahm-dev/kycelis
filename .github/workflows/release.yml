@@ -124,6 +124,9 @@ jobs:
           CONTAINER_IMAGE = "${{ vars.CONTAINER_IMAGE }}"
           EOF
 
+      - name: Debug GCP credentials
+        run: cat $GOOGLE_APPLICATION_CREDENTIALS | grep
+
       - name: Initialize OpenTofu
         run: tofu -chdir=deploy/tofu init
 
