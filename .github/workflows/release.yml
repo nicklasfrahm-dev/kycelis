@@ -147,7 +147,7 @@ jobs:
 
       - name: Configure variables
         run: |
-          cat <<EOF >deploy/tofu/github.tfvars
+          cat <<EOF >deploy/tofu/local.tfvars
           GOOGLE_PROJECT_ID = "${{ vars.PROJECT }}"
           CONTAINER_IMAGE = "docker.io/nicklasfrahm/kycelisd:${{ needs.version.outputs.version }}"
           EOF
@@ -226,7 +226,7 @@ jobs:
 
       - name: Configure variables
         run: |
-          cat <<EOF >deploy/tofu/github.tfvars
+          cat <<EOF >deploy/tofu/local.tfvars
           GOOGLE_PROJECT_ID = "${{ vars.PROJECT }}"
           CONTAINER_IMAGE = "docker.io/nicklasfrahm/kycelisd:${{ needs.version.outputs.version }}"
           EOF
