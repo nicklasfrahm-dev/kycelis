@@ -202,7 +202,6 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs:
       - release
-      - plan
       - version
     permissions:
       contents: write
