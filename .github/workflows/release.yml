@@ -204,9 +204,8 @@ jobs:
       - release
       - version
     permissions:
-      contents: write
-      pull-requests: write
-      issues: write
+      contents: read
+      id-token: write
     environment:
       name: google
     steps:
